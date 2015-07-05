@@ -1,0 +1,9 @@
+/openfile.c~
+*.un
+/*.un
+/.array.c.un~
+/.array.h.un~
+/html_parser.h~
+/.html_parser.h.un~
+/.openfile.c.un~
+/array.c~
