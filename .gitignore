@@ -7,3 +7,6 @@
 /.html_parser.h.un~
 /.openfile.c.un~
 /array.c~
+html_parser
+.gdb*
+a.out
