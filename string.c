@@ -1,6 +1,7 @@
 #include "string.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 #define MAX_INT (int)((unsigned int)(~(int)0)>>1)
 
 void string_init(String *string){
@@ -85,17 +86,18 @@ int  string_compair_with_chars(String* lstring, char* c){
 }
 int  string_compair_chars(int* lstring, int* end, char* c){
   int char_size = 0, lstring_size = 0;
-  while(c[char_size] != '\0') char_size++;
-  while(&lstring[lstring_size] != end) lstring_size++;
-  int equality = 0;
+  while(c[char_size]) ++char_size;
+  if(lstring < end) lstring_size = (int)(end-lstring);
+  else lstring_size = (int)(lstring-end);
+  ++lstring_size;
+  assert(lstring_size > 0);
   if(lstring_size != char_size)
     return -1;
   for(int i =0; i< char_size; i++)
     if(lstring[i] != c[i]){
-      equality = -1;
-      break;
+      return -1;
     }
-  return equality;
+  return 0;
 }
 int* string_get(String* string, int index)
 {
