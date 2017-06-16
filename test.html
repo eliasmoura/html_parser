@@ -1,10 +1,41 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta></meta>
-</head>
-<body>
-  <p>First p text</p>
-  <p>Second p text<p>Inner second p text</p></p>
-  body text
-</body>
+    <title>My html test file</title>
+    <script type="text/javascript">
+      var test = document.getElementById('teste');
+      console.log(test.value);
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="fragment" content="!">
+    <link rel="stylesheet" href="client/css/random.min.css"/>
+    <link rel="stylesheet" href="static/css/client.css" />
+    <script type="text/javascript" src="client/js/jquery.min.js"></script>
+    <script type="text/javascript" src="static/js/client.js" ></script>
+  </head>
+  <body>
+    <a class="link" href="http://www.example.com">Example of a link</a>
+    <div>
+      <p>First p text</p>
+      <p>Second p text<p id="test" >Inner second p text</p></p>
+    </div>
+    <span class="a unecessary span" id="unecessary-span">
+      some text
+      <ul class="bullet-list">
+        <li class="first" ><a class="navigation" href="#">First item</a></li>
+        <li class="second"><a class="navigation" href="#">Second item</a></li>
+        <li class="third" ><a class="navigation" href="#">Third item</a></li>
+        <li class="fourth"><a class="navigation" href="#">Fourth item</a></li>
+      </ul>
+    </span>
+    <hr />
+    <!-- "hiden" stuff -->
+    <form class="form" action="/go-here" method=post>
+      <h1>A form</h1>
+      <input type="text" class="input" placeholder="A input">
+      <button type="submit" class="button">A button</button>
+    </form>
+    body text
+  </body>
 </html>
