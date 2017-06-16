@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta></meta>
+    <!-- NOTE: makes mobile and PC page size different -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta charset="UTF-8">
+    <meta name="fragment" content="!">
     <title>My html test file</title>
     <script type="text/javascript">
       var test = document.getElementById('teste');
       console.log(test.value);
     </script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <meta name="fragment" content="!">
     <link rel="stylesheet" href="client/css/random.min.css"/>
     <link rel="stylesheet" href="static/css/client.css" />
     <script type="text/javascript" src="client/js/jquery.min.js"></script>
@@ -17,7 +18,7 @@
   <body>
     <a class="link" href="http://www.example.com">Example of a link</a>
     <div>
-      <p>First p text</p>
+      <p class="something">First p text</p>
       <p>Second p text<p id="test" >Inner second p text</p></p>
     </div>
     <span class="a unecessary span" id="unecessary-span">
