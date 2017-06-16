@@ -35,7 +35,6 @@ struct node {
   int total_childs;
   struct node *childs;
 };
-
 void add_child_node(struct node *child_array, int *size, struct node child) {
   child_array[*size] = child;
   *size += 1;
@@ -53,11 +52,10 @@ void add_node(struct node *root, int new_node_deph, struct node *new_node){
 }
 int init_size = 1000;
 void alloc_memory(struct node *node) {
-  node->childs = calloc(sizeof(struct node), init_size);
+  node->childs = calloc(sizeof(struct node), (unsigned int)init_size);
   node->total_childs = 0;
   assert(node->childs != NULL);
 }
-
 void print_nodes(struct node *root){
   printf("%s\n", tag_string[root->token]);
   for(int i = 0; i < root->total_childs; i++){
@@ -66,7 +64,6 @@ void print_nodes(struct node *root){
     print_nodes(&root->childs[i]);
   }
 }
-
 int main(int argc, char **argv) {
   char *path;
   if (argc == 2)
@@ -76,14 +73,15 @@ int main(int argc, char **argv) {
   FILE *file = fopen(path, "r");
   if (file == NULL) {
     printf("Couldn't load the file \"%s\"!! Exiting...\n", path);
+    return 1;
   }
-  printf("Reading file\n");
-  char element;
+  printf("Reading file: %s\n", path);
+  int element;
   String raw_text;
   string_init(&raw_text);
   while ((element = fgetc(file)) != '\0' && element != EOF) {
     string_append_char(&raw_text, element);
-    // printf("%c", element);
+    /* printf("%c", element); */
   }
   printf("\n");
 
@@ -96,9 +94,9 @@ int main(int argc, char **argv) {
   node.token = HTML_DOC;
   alloc_memory(&node);
 
-  struct node *node_stack;  //[init_size];
+  struct node *node_stack;
   node_stack =
-      (struct node *)(struct node *)malloc(sizeof(struct node) * init_size);
+      (struct node *)calloc((size_t)init_size, sizeof(struct node));
   assert(node_stack);
   //  alloc_memory(node_stack);
   //  add_child_node(node_stack, node);
@@ -132,7 +130,7 @@ int main(int argc, char **argv) {
             struct node new_node;
             //            printf("token: %d", new_node.token);
             alloc_memory(&new_node);
-            new_node.token = i;
+            new_node.token = (enum html_tag)i;
             new_node.is_closing_token = false;
             add_node(&node, deph, &new_node);
             ++deph;
@@ -157,5 +155,7 @@ int main(int argc, char **argv) {
   print_nodes(node.childs);
   /* printf("stack size: %d\n", node_stack[0].childs[0].token); */
   fclose(file);
+  free(raw_text.data);
+  free(node_stack);
   return 0;
 }
