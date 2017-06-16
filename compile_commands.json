@@ -1,0 +1,12 @@
+[
+  {
+    "directory": "/home/kotto/dev/c/html_parser/",
+    "command": "/usr/bin/clang -std=c11 -Irelative -Wall -Wextra -Wno-missing-field-initializers -Werror -Wconversion -Wstrict-prototypes -pedantic -Wformat-security -I, -c html_parser.c",
+    "file": "/home//kotto/dev/c/html_parser/html_parser.c"
+  },
+  {
+    "directory": "/home/kotto/dev/c/html_parser/",
+    "command": "/usr/bin/clang -g -fsanitize=undefined -std=c11 -Wall -Wextra -Wno-missing-field-initializers -Werror -Wconversion -Wstrict-prototypes -fPIC -I. -o librequest_handler.so -c string.c",
+    "file": "/home/kotto/dev/c/html_parser/string.c"
+  }
+]
