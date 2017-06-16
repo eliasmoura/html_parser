@@ -56,12 +56,14 @@ void alloc_memory(struct node *node) {
   node->total_childs = 0;
   assert(node->childs != NULL);
 }
-void print_nodes(struct node *root){
-  printf("%s\n", tag_string[root->token]);
-  for(int i = 0; i < root->total_childs; i++){
-    for (int j = 0; j <= i; j++)
-      printf("  ");
-    print_nodes(&root->childs[i]);
+void print_nodes(struct node *parent, int level){
+  char *identing = "  ";
+  printf("%s\n", tag_string[parent->token]);
+  ++level;
+  for(int i = 0; i < parent->total_childs; ++i){
+    for (int j = 0; j < level; ++j)
+      printf("%s", identing);
+    print_nodes(&parent->childs[i], level);
   }
 }
 int main(int argc, char **argv) {
@@ -81,9 +83,7 @@ int main(int argc, char **argv) {
   string_init(&raw_text);
   while ((element = fgetc(file)) != '\0' && element != EOF) {
     string_append_char(&raw_text, element);
-    /* printf("%c", element); */
   }
-  printf("\n");
 
   int *interator = raw_text.data;
   int *start_token = NULL, *end_token = NULL;
@@ -152,7 +152,7 @@ int main(int argc, char **argv) {
     }
     ++interator;
   }
-  print_nodes(node.childs);
+  print_nodes(node.childs, 0);
   /* printf("stack size: %d\n", node_stack[0].childs[0].token); */
   fclose(file);
   free(raw_text.data);
