@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
   int *interator = raw_text.data;
   int *start_token = NULL, *end_token = NULL;
-  bool32 in_token = false;
+  bool32 in_tag = false;
   bool32 is_closing_token = false;
 
   struct node node;
@@ -110,18 +110,18 @@ int main(int argc, char **argv) {
       else
         is_closing_token = false;
       start_token = interator;
-      in_token = true;
+      in_tag = true;
       end_token = NULL;
     }
 
-    if (in_token) {
+    if (in_tag) {
       if (*interator == '>') {
         end_token = interator;
-        in_token = false;
+        in_tag = false;
       }
     }
 
-    if (end_token != NULL) {
+    if (end_token) {
       if (is_closing_token) ++start_token;
       for (int i = 0; i < MAX_HTML_TAGS; i++) {
         if (string_compair_chars(start_token + 1, end_token, tag_string[i]) ==
