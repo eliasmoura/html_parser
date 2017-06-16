@@ -13,6 +13,7 @@ typedef double real64;
 
 #define false 0
 #define true 1
+#define INIT_SIZE  1000
 
 #define HTML_TAG_LIST    \
   TAG(HTML_HTML, "html") \
@@ -50,9 +51,8 @@ void add_node(struct node *root, int new_node_deph, struct node *new_node){
   root->total_childs +=1;
   }
 }
-int init_size = 1000;
 void alloc_memory(struct node *node) {
-  node->childs = calloc(sizeof(struct node), (unsigned int)init_size);
+  node->childs = calloc(sizeof(struct node), (unsigned int)INIT_SIZE);
   node->total_childs = 0;
   assert(node->childs != NULL);
 }
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
   struct node *node_stack;
   node_stack =
-      (struct node *)calloc((size_t)init_size, sizeof(struct node));
+      (struct node *)calloc((size_t)INIT_SIZE, sizeof(struct node));
   assert(node_stack);
   //  alloc_memory(node_stack);
   //  add_child_node(node_stack, node);
