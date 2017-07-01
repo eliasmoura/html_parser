@@ -192,21 +192,21 @@ int main(int argc, char **argv) {
     return 1;
   }
   printf("Reading file: %s\n", path);
-  int element;
+  wint_t element;
   String raw_text;
   string_init(&raw_text);
-  while ((element = fgetc(file)) != '\0' && element != EOF) {
-    string_append_char(&raw_text, element);
+  while ((element = fgetwc(file)) != '\0' && element != WEOF) {
+    string_append_char(&raw_text, (wchar_t)element);
   }
 
-  int *interator = raw_text.data;
-  int *start_token = NULL, /**end_tag = NULL,*/ *end_token = NULL;
+  wchar_t *interator = raw_text.data;
+  wchar_t *start_token = NULL, /**end_tag = NULL,*/ *end_token = NULL;
   bool32 in_tag = false;
   bool32 is_closing_tag = false;
 
   struct node root = {0};
-  alloc_memory(&root);
-  root.token = HTML_DOC;
+  node_init(&root, HTML_DOC);
+  root.self_close = 1;
 
   struct node *walk = &root;
 
