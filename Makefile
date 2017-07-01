@@ -11,6 +11,12 @@ html_parser: html_parser.o string.o
 %.o: %.c
 	${CC} ${FLAGS} ${LIBS} ${DEBUG_ARGS} -c $^
 
+debug: html_parser
+	gdb -nh -x /home/kotto/local/cfg/gdb/init $^
+
+run: html_parser test.html
+	./html_parser test.html 1>&2
+
 clean:
 	-rm string.o html_parser.o
 	-rm html_parser
