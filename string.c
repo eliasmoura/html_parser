@@ -25,36 +25,36 @@ void string_append(String* string, String* value){
   string->data[string->size+i] = value->data[i];
   string->size += 1;
 }
-String string_copy(String* string){
-  String str;
-  str.capacity = string->capacity;
-  str.data = malloc(sizeof(String) * (size_t)str.capacity * sizeof(char));
-  assert(string->data != NULL);
-  str.size = string->size;
-  for(int i=0; i<string->size; i++)
-    str.data[i] = string->data[i];
-  return str;
+void string_copy(wchar_t *start, wchar_t *end, String *dest){
+  int size = (int)(end-start)+1;
+  if(dest->capacity < size)
+    dest->data = malloc(sizeof(wchar_t) * (size_t)(size+1));
+  assert(dest->data != NULL);
+  dest->size = size;
+  for(size_t i = 0; start<=end; ++start)
+    dest->data[i++] = *start;
+  dest->data[dest->size] = '\0';
 }
-String string_copy_from_char(char *c){
+String string_copy_from_char(wchar_t *c){
   String str;
   int count =0;
   while(c[count] != '\0') ++count;
   str.size = 0;
   if(!count) return str;
   str.capacity = count;
-  str.data = (int *)malloc(sizeof(String) * (size_t)str.capacity * sizeof(char));
+  str.data = (wchar_t *)malloc(sizeof(String) * (size_t)str.capacity * sizeof(char));
   assert(str.data != NULL);
   for(int i=0; i<str.size; i++)
     str.data[i] = (c[i]);
   return str;
 }
-void string_append_char(String* string, int c){
-  if((string->size+1) > string->capacity)
+void string_append_char(String* string, wchar_t c){
+  if(string->size >= string->capacity)
     string_resize(string, (int)((string->size + 1) * 1.5));
   string->data[string->size] = c;
   string->size += 1;
 }
-void string_append_chars(String* string, char *c){
+void string_append_chars(String* string, wchar_t *c){
   int count =0;
   while(c[count] != '\0') ++count;
   if((string->size+count) > string->capacity)
@@ -72,7 +72,7 @@ int  string_compair(String* lstring, String* rstring){
     }
   return equality;
 }
-int  string_compair_with_chars(String* lstring, char* c){
+int  string_compair_with_chars(String* lstring, wchar_t * c){
   int char_size = 0;
   while(c[char_size] != '\0') char_size++;
   int size = lstring->size > char_size ? char_size:lstring->size;
@@ -84,37 +84,35 @@ int  string_compair_with_chars(String* lstring, char* c){
     }
   return equality;
 }
-int  string_compair_chars(int* lstring, int* end, char* c){
-  int char_size = 0, lstring_size = 0;
+int  string_compair_chars(wchar_t * lstring, wchar_t * end, wchar_t * c){
+  size_t char_size = wcslen(c), lstring_size = 0;
   while(c[char_size]) ++char_size;
-  if(lstring < end) lstring_size = (int)(end-lstring);
-  else lstring_size = (int)(lstring-end);
+  if(lstring < end) lstring_size = (size_t)(end-lstring);
+  else lstring_size = (size_t)(lstring-end);
   ++lstring_size;
   assert(lstring_size > 0);
   if(lstring_size != char_size)
     return -1;
-  for(int i =0; i< char_size; i++)
+  for(size_t i =0; i< char_size; i++)
     if(lstring[i] != c[i]){
       return -1;
     }
   return 0;
 }
-int* string_get(String* string, int index)
-{
+int* string_get(String* string, int index) {
   assert(index >= 0 && index <= MAX_INT);
   if(string->size > 0)
     return &string->data[index];
   return 0;
 }
-int string_pop(String* string)
-{
+int string_pop(String* string) {
   assert(string->size > 0 && string->size <= MAX_INT);
   int popedNode = (string->data[string->size]);
   string->data[string->size] = 0;
   string->size -=1;
   return popedNode;
 }
-void remove_char(String* string, char c){
+void remove_char(String* string, wchar_t  c){
   String tmp;
   tmp.size = string->size;
   string_init_size(&tmp, string->size);
@@ -128,8 +126,7 @@ void remove_char(String* string, char c){
   free(string->data);
   string->data = tmp.data;
 }
-void string_resize(String* string, int size)
-{
+void string_resize(String* string, int size) {
   assert(size > string->size);
     string->capacity = string->size * 2;
     int* tmp = (int *)realloc(string->data, sizeof(String) * (size_t)string->capacity * sizeof(string->data));
@@ -139,7 +136,8 @@ void string_resize(String* string, int size)
       string->data[i] = '\0';
     assert(tmp != NULL);
 }
-void string_free(String* string)
-{
+void free_string(String* string) {
   free(string->data);
+  string->size = 0;
+  string->capacity = 0;
 }
