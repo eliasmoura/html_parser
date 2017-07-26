@@ -140,7 +140,7 @@ typedef double real64;
   TAG(HTML_VIDEO, L"video", 0, 0)                                              \
   TAG(HTML_WBR, L"wbr", 0, 0)                                                  \
   TAG(HTML_TEXT, L"text", 1, 0)                                                \
-  TAG(HTML_DOC, L"HTML_DOC", 1, 0)
+  TAG(HTML_DOC, L"HTML_DOC", 0, 0)
 
 #define TAG(tag, string, self_close, ver) tag,
 enum html_tag { HTML_TAG_LIST MAX_HTML_TAGS };
@@ -173,7 +173,7 @@ struct node {
 void node_init(struct node *root, enum html_tag tag) {
   root->token = tag;
   root->self_close = tag_self_close[root->token];
-  if (!root->self_close || root->token == HTML_DOC) {
+  if (!root->self_close) {
     root->childs = calloc(sizeof(struct node), (unsigned int)INIT_SIZE);
     assert(root->childs);
   } else
