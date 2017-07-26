@@ -271,27 +271,29 @@ void print_nodes(struct node *parent, int level) {
   }
 }
 int main(int argc, char **argv) {
-  setlocale(LC_CTYPE, NULL);
-  char *path;
-  if (argc == 2)
-    path = argv[1];
-  else
-    path = "test.html";
-  FILE *file = fopen(path, "r");
-  if (file == NULL) {
-    printf("Couldn't load the file \"%s\"!! Exiting...\n", path);
-    return 1;
+  setlocale(LC_CTYPE, "en_US.utf8");
+  FILE *file = NULL;
+  if (argc == 2) {
+    char *path = argv[1];
+    printf("Reading file: %s\n", path);
+    file = fopen(path, "r");
+    if (file == NULL) {
+      printf("Couldn't load the file \"%s\"!! Exiting...\n", path);
+      return 1;
+    }
+  } else {
+    file = stdin;
+    fprintf(stderr, "Reading from stdin\n");
   }
-  printf("Reading file: %s\n", path);
-  wint_t element;
   String raw_text;
   string_init(&raw_text);
-  while ((element = fgetwc(file)) != '\0' && element != WEOF) {
-    string_append_char(&raw_text, (wchar_t)element);
+  wint_t c = 0;
+  while ((c = fgetwc(file)) && c != WEOF) {
+    string_append_char(&raw_text, (int)c);
   }
 
   wchar_t *interator = raw_text.data;
-  wchar_t *start_token = NULL, /**end_tag = NULL,*/ *end_token = NULL;
+  wchar_t *start_token = NULL, *end_token = NULL;
   bool32 in_tag = false;
   bool32 is_closing_tag = false;
 
@@ -372,7 +374,6 @@ int main(int argc, char **argv) {
         end_token = interator - 1;
 
         struct attribute attr = {0};
-        string_init(&attr.name);
         string_copy(start_token, end_token, &attr.name);
 
         if (*interator != '=') {
@@ -387,7 +388,6 @@ int main(int argc, char **argv) {
         while (*interator != '"' && *interator != '>' && *interator != '<')
           ++interator;
         end_token = interator - 1;
-        string_init(&attr.value);
         string_copy(start_token, end_token, &attr.value);
 
         add_attribute(walk, &attr);
