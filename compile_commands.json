@@ -1,7 +1,7 @@
 [
   {
     "directory": "/home/kotto/dev/c/html_parser/",
-    "command": "/usr/bin/clang -std=c11 -Irelative -Wall -Wextra -Wno-missing-field-initializers -Werror -Wconversion -Wstrict-prototypes -pedantic -Wformat-security -I, -c html_parser.c",
+    "command": "/usr/bin/clang -std=c11 -Irelative -Wall -Wextra -Wno-missing-field-initializers -Werror -Wconversion -Wstrict-prototypes -pedantic -Wformat-security -Wno-missing-field-initializers -I, -c html_parser.c",
     "file": "/home//kotto/dev/c/html_parser/html_parser.c"
   },
   {
