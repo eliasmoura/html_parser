@@ -192,18 +192,20 @@ void add_node(struct node *root, enum html_tag new_node) {
   ++root->size;
 }
 void add_attribute(struct node *root, struct attribute *attr) {
-  if (!root->attr) {
+  if (!root->attr_cap) {
     root->attr = calloc(sizeof(struct attribute), (unsigned int)root->cap);
     root->attr_size = 0;
     root->attr_cap = 10;
-  }
-  if (root->attr_size >= root->attr_cap) {
-    root->attr_cap = 10 * 2;
-    struct attribute *tmp = root->attr;
-    root->attr = calloc(sizeof(struct attribute), (unsigned int)root->cap);
-    for (int i = 0; i < root->size; ++i)
-      root->attr[i] = tmp[i];
-    free(tmp);
+  } else if (root->attr_size >= root->attr_cap) {
+    int attr_cap = root->attr_size * 2;
+    struct attribute *tmp =
+        realloc(root->attr, sizeof(struct attribute) * (unsigned int)attr_cap);
+    if (tmp != NULL) {
+      root->attr_cap = (int)attr_cap;
+      root->attr = (struct attribute *)tmp;
+      for (int i = root->attr_size; i < root->attr_cap; ++i)
+        root->attr[i] = (struct attribute){0};
+    }
   }
   root->attr[root->attr_size].name = attr->name;
   root->attr[root->attr_size].value = attr->value;
