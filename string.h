@@ -1,3 +1,6 @@
+#ifndef STRING_H
+#define STRING_H
+
 #include <assert.h>
 #include <stdlib.h>
 #include <wchar.h>
@@ -24,3 +27,4 @@ int string_pop(String *string);
 void remove_char(String *string, wchar_t c);
 void string_resize(String *string, int size);
 void free_string(String *string);
+#endif
