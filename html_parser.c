@@ -94,23 +94,6 @@ void free_nodes(struct node *root) {
   }*/
 }
 
-void print_nodes(struct node *parent, int level) {
-  char *identing = "  ";
-  printf("%ls", tag_string[parent->token]);
-  for (int i = 0; i < parent->attr_size; ++i) {
-    printf("\t%ls", parent->attr[i].name.data);
-    if (parent->attr[i].value.data)
-      printf(" → %ls", parent->attr[i].value.data);
-  }
-  printf("\n");
-  ++level;
-  for (int i = 0; i < parent->size; ++i) {
-    for (int j = 0; j < level; ++j)
-      printf("%s", identing);
-    print_nodes(&parent->childs[i], level);
-  }
-}
-
 void parse(struct node *node, wchar_t *text) {
   wchar_t *interator = text;
   wchar_t *start_token = NULL, *end_token = NULL;

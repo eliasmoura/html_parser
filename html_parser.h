@@ -171,7 +171,6 @@ void add_node(struct node *root, enum html_tag new_node);
 void add_attribute(struct node *root, struct attribute *attr);
 void free_attr(struct attribute *attr);
 void free_nodes(struct node *root);
-void print_nodes(struct node *parent, int level);
 void parse(struct node *node, wchar_t *text);
 
 #endif // _HTML_PARSER_H
