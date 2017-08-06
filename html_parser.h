@@ -148,6 +148,8 @@ wchar_t *tag_string[] = {HTML_TAG_LIST};
 uint8_t tag_self_close[] = {HTML_TAG_LIST};
 #undef TAG
 
+enum srch_type { HTML_TAG, TAG_CLASS, TAG_ID, INPUT_TYPE };
+
 struct attribute {
   int id;
   String name;
@@ -166,11 +168,20 @@ struct node {
   struct node *childs;
 };
 
+struct srch_node {
+    enum srch_type type;
+    String str;
+};
 void node_init(struct node *root, enum html_tag tag);
 void add_node(struct node *root, enum html_tag new_node);
 void add_attribute(struct node *root, struct attribute *attr);
 void free_attr(struct attribute *attr);
 void free_nodes(struct node *root);
+struct node *search(struct node *root, wchar_t *str);
+int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
+/* Search for the nodes by css matching system. */
+enum html_tag get_token(wchar_t *start, wchar_t *end);
+struct node *get_node(struct node *root, struct srch_node srch);
 void parse(struct node *node, wchar_t *text);
 
 #endif // _HTML_PARSER_H

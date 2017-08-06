@@ -6,25 +6,22 @@ ASAN_OPTIONS=strict_string_checks=1:detect_stack_use_after_return=1:check_initia
 INC=-I.
 CC=clang
 
-all: html_parser.so
+all: libhtml_parser.so
 
-test: print_tree html_parser.so
+test: print_tree libhtml_parser.so
 
 %.o: %.c
 	${CC} ${FLAGS} ${DEBUG_ARGS} -fPIC -c $<
 
-html_parser.so: html_parser.o string.o
+libhtml_parser.so: html_parser.o string.o
 	${CC} ${FLAGS} $^ -shared -o $@
 
-print_tree: print_tree.o html_parser.so string.o
+print_tree: test/print_tree.c libhtml_parser.so string.o
 	${CC} ${FLAGS} ${DEBUG_ARGS} $^ -o test/$@
 
-debug: html_parser
-	gdb -nh -x /home/kotto/local/cfg/gdb/init $^
+search_nodes: test/search_nodes.c libhtml_parser.so string.o
+	${CC} ${FLAGS} ${DEBUG_ARGS} $^ -o test/$@
 
-run: html_parser sample/test.html
-	./html_parser ./sample/test.html 1>&2
-
-clean: html_parser.o print_tree.o string.o html_parser.so print_tree
+clean: html_parser.o print_tree.o string.o libhtml_parser.so print_tree
 	-rm *.o
 	-rm print_tree *.so
