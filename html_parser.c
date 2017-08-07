@@ -202,11 +202,8 @@ void parse(struct node *node, wchar_t *text) {
         ;
       end_token = interator - 1;
 
-      for (int i = 0; i < MAX_HTML_TAGS; i++) {
-        if (string_compair_chars(start_token, end_token,
-                                 (wchar_t *)tag_string[i]) == 0) {
           if (!is_closing_tag) {
-            add_node(walk, (enum html_tag)i);
+            add_node(walk, get_token(start_token, end_token));
             // XXX: I would like to use something like this, this makes things
             // harder, howerver.
             /* if(!walk->childs[walk->size-1].self_close) */
@@ -217,8 +214,6 @@ void parse(struct node *node, wchar_t *text) {
           } else if (walk->parent)
             walk = walk->parent;
           break;
-        }
-      }
       start_token = NULL;
       end_token = NULL;
     }
