@@ -1,6 +1,6 @@
+#include "../html_parser.h"
 #include <locale.h>
 #include <stdio.h>
-#include "../html_parser.h"
 
 void print_nodes(struct node *parent, int level) {
   char *identing = "  ";

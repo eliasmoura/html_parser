@@ -1,9 +1,9 @@
 #ifndef _HTML_PARSER_H
 #define _HTML_PARSER_H
 
+#include "string.h"
 #include <stdint.h>
 #include <wchar.h>
-#include "string.h"
 
 typedef uint32_t bool32;
 
@@ -169,8 +169,8 @@ struct node {
 };
 
 struct srch_node {
-    enum srch_type type;
-    String str;
+  enum srch_type type;
+  String str;
 };
 void node_init(struct node *root, enum html_tag tag);
 void add_node(struct node *root, enum html_tag new_node);
@@ -185,4 +185,3 @@ struct node *get_node(struct node *root, struct srch_node srch);
 void parse(struct node *node, wchar_t *text);
 
 #endif // _HTML_PARSER_H
-
