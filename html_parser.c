@@ -1,5 +1,5 @@
-#include "string.h"
 #include "html_parser.h"
+#include "string.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -94,89 +94,85 @@ void free_nodes(struct node *root) {
 }
 
 struct node *search(struct node *root, wchar_t *str) {
-    struct srch_node *srch = calloc(sizeof(struct srch_node), 10);
-    int index = 0;
-    wchar_t * start = str, *end = NULL;
-    struct node *result = 0;
-    while (*str != '\0' ) {
-      while ((*str == ' ' || *str == '\n' || *str == '\r' ||
-              *str == '\t') && *str != '\0')
+  struct srch_node *srch = calloc(sizeof(struct srch_node), 10);
+  int index = 0;
+  wchar_t *start = str, *end = NULL;
+  struct node *result = 0;
+  while (*str != '\0') {
+    while ((*str == ' ' || *str == '\n' || *str == '\r' || *str == '\t') &&
+           *str != '\0')
+      ++str;
+    if (*str == '.') {
+      start = ++str;
+      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
+             *str != '\0')
         ++str;
-        if(*str == '.') {
-        start = ++str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' &&
-              *str != '\t' && *str != '\0')
+      end = str - 1;
+      srch[index].type = TAG_CLASS;
+      string_copy(start, end, &srch[index].str);
+    } else if (*str == '#') {
+      start = ++str;
+      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
+             *str != '\0')
         ++str;
-        end = str-1;
-            srch[index].type = TAG_CLASS;
-            string_copy(start, end, &srch[index].str);
-        }
-        else if (*str == '#') {
-        start = ++str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' &&
-              *str != '\t' && *str != '\0')
+      end = str - 1;
+      srch[index].type = TAG_ID;
+      string_copy(start, end, &srch[index].str);
+    } else {
+      start = str;
+      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
+             *str != '\0')
         ++str;
-        end = str-1;
-            srch[index].type = TAG_ID;
-            string_copy(start, end, &srch[index].str);
-        }
-        else {
-        start = str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' &&
-              *str != '\t' && *str != '\0')
-        ++str;
-        end = str-1;
-            srch[index].type = HTML_TAG;
+      end = str - 1;
+      srch[index].type = HTML_TAG;
       for (int i = 0; i < MAX_HTML_TAGS; i++) {
-        if (string_compair_chars(start, end,
-                                 tag_string[i]) == 0) {
-                                     string_copy(start, end, &srch[index].str);
-                                 }
-                                 }
+        if (string_compair_chars(start, end, tag_string[i]) == 0) {
+          string_copy(start, end, &srch[index].str);
         }
-        // > , [input] ![text] !([password] || [email])
-      ++index;
+      }
     }
-    for(int i = 0; i < index; ++i)
-        if((result = get_node(root, srch[i])))
-            return result;
-    return 0;
+    // > , [input] ![text] !([password] || [email])
+    ++index;
+  }
+  for (int i = 0; i < index; ++i)
+    if ((result = get_node(root, srch[i])))
+      return result;
+  return 0;
 }
 
 struct node *get_node(struct node *root, struct srch_node srch) {
-		struct node *it = root;
-		int move = 0;
-		if(root->token == get_token(srch.str.data, &srch.str.data[srch.str.size-1])){
-    		return root;
-		}
-		while(root->size > move)
-		{
-    		if(srch.type == HTML_TAG) {
-        		if(root->childs[move].token == get_token(srch.str.data, &srch.str.data[srch.str.size-1])){
-            		return &root->childs[move];
-        		}
-    		} //else if(srch[i]->type == TAG_CLASS)
-    		++move;
-		}
-		move = 0;
-		while(root->size > move)
-		{
-    		if(srch.type == HTML_TAG) {
-        		if((it = get_node(&root->childs[move++], srch))) return it;
-    		}//else if(srch[i]->type == TAG_CLASS)
-		}
-		return 0;
+  struct node *it = root;
+  int move = 0;
+  if (root->token ==
+      get_token(srch.str.data, &srch.str.data[srch.str.size - 1])) {
+    return root;
+  }
+  while (root->size > move) {
+    if (srch.type == HTML_TAG) {
+      if (root->childs[move].token ==
+          get_token(srch.str.data, &srch.str.data[srch.str.size - 1])) {
+        return &root->childs[move];
+      }
+    } // else if(srch[i]->type == TAG_CLASS)
+    ++move;
+  }
+  move = 0;
+  while (root->size > move) {
+    if (srch.type == HTML_TAG) {
+      if ((it = get_node(&root->childs[move++], srch)))
+        return it;
+    } // else if(srch[i]->type == TAG_CLASS)
+  }
+  return 0;
 }
 
-enum html_tag get_token(wchar_t *start, wchar_t *end)
-{
-          for (int i = 0; i < MAX_HTML_TAGS; i++) {
-        if (string_compair_chars(start, end,
-                                 (wchar_t *)tag_string[i]) == 0) {
-                                     return (enum html_tag)i;
-        }
-      }
-      return HTML_UNKNOWNTAG;
+enum html_tag get_token(wchar_t *start, wchar_t *end) {
+  for (int i = 0; i < MAX_HTML_TAGS; i++) {
+    if (string_compair_chars(start, end, (wchar_t *)tag_string[i]) == 0) {
+      return (enum html_tag)i;
+    }
+  }
+  return HTML_UNKNOWNTAG;
 }
 
 void parse(struct node *node, wchar_t *text) {
@@ -185,7 +181,7 @@ void parse(struct node *node, wchar_t *text) {
   bool32 in_tag = false;
   bool32 is_closing_tag = false;
   struct node *walk = node;
-    while (*interator != '\0' ) {
+  while (*interator != '\0') {
     if (*interator == '<') {
       ++interator;
       in_tag = true;
@@ -198,22 +194,22 @@ void parse(struct node *node, wchar_t *text) {
       start_token = interator;
       while (++interator &&
              ((*interator >= 'a' && *interator <= 'z') ||
-              (*interator >= 'A' && *interator <= 'Z') || *interator == '-'))
+              (*interator >= 'A' && *interator <= 'Z') ||
+              (*interator >= '0' && *interator <= '9') || *interator == '-'))
         ;
       end_token = interator - 1;
 
-          if (!is_closing_tag) {
-            add_node(walk, get_token(start_token, end_token));
-            // XXX: I would like to use something like this, this makes things
-            // harder, howerver.
-            /* if(!walk->childs[walk->size-1].self_close) */
-            /* { */
-            /*   walk = walk->childs + walk->size - 1; */
-            /* } */
-            walk = walk->childs + (walk->size - 1);
-          } else if (walk->parent)
-            walk = walk->parent;
-          break;
+      if (!is_closing_tag) {
+        add_node(walk, get_token(start_token, end_token));
+        // XXX: I would like to use something like this, this makes things
+        // harder, howerver.
+        /* if(!walk->childs[walk->size-1].self_close) */
+        /* { */
+        /*   walk = walk->childs + walk->size - 1; */
+        /* } */
+        walk = walk->childs + (walk->size - 1);
+      } else if (walk->parent)
+        walk = walk->parent;
       start_token = NULL;
       end_token = NULL;
     }
