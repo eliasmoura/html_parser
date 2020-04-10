@@ -1,6 +1,7 @@
 #include "../html_parser.h"
 #include <locale.h>
 #include <stdio.h>
+#include <errno.h>
 
 void print_nodes(struct node *parent, int level) {
   char *identing = "  ";
@@ -22,24 +23,39 @@ void print_nodes(struct node *parent, int level) {
 int main(int argc, char *argv[]) {
   setlocale(LC_CTYPE, "en_US.utf8");
   FILE *file = NULL;
+  String raw_text;
+
   if (argc == 2) {
     char *path = argv[1];
     printf("Reading file: %s\n", path);
     file = fopen(path, "r");
+
     if (file == NULL) {
       printf("Couldn't load the file \"%s\"!! Exiting...\n", path);
       return 1;
     }
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    string_init_capacity(&raw_text, (int)size);
+    wint_t wc = 0;
+    int err;
+    while ((wc = fgetwc(file)) && !feof(file)) {
+      string_append_char(&raw_text, (int)wc);
+      if((err = ferror(file))) { printf("Error: %s\n", strerror(err)); clearerr(file);fflush(stdout);}
+    }
+    if (wc == WEOF && raw_text.size == 0) {
+      clearerr(file);
+      int c = 0;
+      while((c = fgetc(file)) && c != EOF){
+        string_append_char(&raw_text, c);
+      }
+    }
   } else {
     file = stdin;
     fprintf(stderr, "Reading from stdin\n");
-  }
-
-  String raw_text;
-  string_init(&raw_text);
-  wint_t c = 0;
-  while ((c = fgetwc(file)) && c != WEOF) {
-    string_append_char(&raw_text, (int)c);
+    string_init(&raw_text);
   }
 
   struct node root = {0};
