@@ -91,62 +91,123 @@ struct node **search(struct node *root, wchar_t *str, int *size) {
              *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].type = TAG_CLASS;
-      string_copy(start, end, &srch[index].str);
+      srch[index].token = get_token(start, end);
     } else if (*str == '#') {
       start = ++str;
       while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
              *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].type = TAG_ID;
-      string_copy(start, end, &srch[index].str);
+      srch[index].token = get_token(start, end);
     } else {
       start = str;
       while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
              *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].type = HTML_TAG;
-      for (int i = 0; i < MAX_HTML_TAGS; i++) {
-        if (string_compair_chars(start, end, tag_string[i]) == 0) {
-          string_copy(start, end, &srch[index].str);
-        }
-      }
+      srch[index].token = get_token(start, end);
+        
     }
     // > , [input] ![text] !([password] || [email])
     ++index;
   }
-  for (int i = 0; i < index; ++i)
-    if ((result = get_node(root, srch[i])))
-      return result;
+
+  result= get_nodes(root, srch, index, size);
+  free(srch);
+  if (result)
+    return result;
   return 0;
 }
 
-struct node *get_node(struct node *root, struct srch_node srch) {
-  struct node *it = root;
-  int move = 0;
-  if (root->token ==
-      get_token(srch.str.data, &srch.str.data[srch.str.size - 1])) {
-    return root;
-  }
-  while (root->size > move) {
-    if (srch.type == HTML_TAG) {
-      if (root->childs[move].token ==
-          get_token(srch.str.data, &srch.str.data[srch.str.size - 1])) {
-        return &root->childs[move];
+struct node *next_node(struct node *node) {
+  struct node *prev = node;
+  struct node *next = node;
+  while(next){
+    if(next->childs != NULL){
+      if(next == prev->parent) {
+        if(prev != next->childs+(next->size-1)){// not the last child
+          next = ++prev;
+          break;
+        }  else { // if(next != next->childs+next->size-1)
+          prev = next;
+          next = next->parent;
+        }
+      } else { // if(next == prev->parent)
+        next = next->childs;
+        break;
       }
-    } // else if(srch[i]->type == TAG_CLASS)
-    ++move;
+    } else { // if(next->childs != NULL)
+      prev = next;
+      next = next->parent;
+    }
   }
-  move = 0;
-  while (root->size > move) {
-    if (srch.type == HTML_TAG) {
-      if ((it = get_node(&root->childs[move++], srch)))
-        return it;
-    } // else if(srch[i]->type == TAG_CLASS)
+  return next;
+}
+
+bool is_in_node(struct node* root, struct node *child){
+  bool result = false;
+  while(child && child != root) {
+    if(root == child) {
+      result = true;
+      break;
+    }
+    child = child->parent;
   }
-  return 0;
+  return result;
+}
+
+struct node ** get_nodes(struct node *root, struct node *srch,
+                        int srch_size, int *size) {
+  struct node *it;
+  int l_index = 0;
+  struct node **list;
+  list = calloc((size_t)l_index+10, sizeof(list[0]));
+  it = root;
+  struct node * base = it;
+
+  while (it) {
+    int s_index = 0;
+    bool is_node = false;
+    for(; s_index < srch_size && it; ++s_index){
+      is_node = false;
+      if (srch[s_index].token != HTML_UNKNOWNTAG) {
+        while(it) {
+          if (it->token == srch[s_index].token) {
+            if(is_in_node(base, it))
+            is_node = true;
+            break;
+          } else {
+              it = next_node(it);
+          }
+        }
+      }
+
+      if(it && srch[s_index].attr) {
+          for (int index = 0; index < srch[s_index].attr_size; index++) {
+            for (int attr_index = 0; attr_index < it->attr_size; attr_index++) {
+              if (srch[s_index].attr[index].id == it->attr[attr_index].id) {
+                if (string_compair(&srch[s_index].attr[index].value, &it->attr[attr_index].value) == 0){
+                  is_node = true;
+                } else {
+                  is_node = false;
+                  index = srch[s_index].attr_size;
+                  break;
+                }
+              }
+          }
+        }
+      } // if(it && srch[s_index].attr)
+      if (is_node) base = it;
+      if(s_index < srch_size-1)
+        it = next_node(it);
+    } // for(; s_index < srch_size; ++s_index)
+    if(is_node && s_index == srch_size) {
+      list[l_index++] = it;
+      it = next_node(it);
+    }
+  }
+  *size = l_index;
+  return list;
 }
 
 enum html_tag get_token(wchar_t *start, wchar_t *end) {
@@ -186,13 +247,14 @@ void parse(struct node *node, wchar_t *text) {
         add_node(walk, get_token(start_token, end_token));
         // XXX: I would like to use something like this, this makes things
         // harder, howerver.
-        /* if(!walk->childs[walk->size-1].self_close) */
-        /* { */
-        /*   walk = walk->childs + walk->size - 1; */
-        /* } */
+        // if(!walk->childs[walk->size-1].self_close)
+        // {
+        //   walk = walk->childs + walk->size - 1;
+        // }
         walk = walk->childs + (walk->size - 1);
-      } else if (walk->parent)
+      } else if (walk->parent){
         walk = walk->parent;
+      }
       start_token = NULL;
       end_token = NULL;
     }
