@@ -1,7 +1,13 @@
+#if __STDC_VERSION__ >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif /* __STDC_VERSION__ */
+
 #include "../html_parser.h"
 #include <locale.h>
 #include <stdio.h>
-#include <errno.h>
+#include <sys/stat.h>
 
 void print_nodes(struct node *parent, int level) {
   char *identing = "  ";
@@ -35,22 +41,15 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    string_init_capacity(&raw_text, (int)size);
+    // NOTE(elias): fseek(file, 0, SEEK_SET); fseek(file, 0, SEEK_END);
+    struct stat f_stat = {0};// makes the fgetwc fail
+    // So I'm using fstat instead. That might be better anyway.
+    fstat(fileno(file), &f_stat);
+
+    string_init_capacity(&raw_text, (int)f_stat.st_size);
     wint_t wc = 0;
-    int err;
     while ((wc = fgetwc(file)) && !feof(file)) {
       string_append_char(&raw_text, (int)wc);
-      if((err = ferror(file))) { printf("Error: %s\n", strerror(err)); clearerr(file);fflush(stdout);}
-    }
-    if (wc == WEOF && raw_text.size == 0) {
-      clearerr(file);
-      int c = 0;
-      while((c = fgetc(file)) && c != EOF){
-        string_append_char(&raw_text, c);
-      }
     }
   } else {
     file = stdin;
