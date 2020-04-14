@@ -6,7 +6,7 @@ void string_init(String *string) {
   string->size = 0;
   string->capacity = 100;
   string->data =
-      (int *)calloc((size_t)string->capacity+1, sizeof(*string->data));
+      (int *)calloc((size_t)string->capacity + 1, sizeof(*string->data));
   assert(string->data != NULL);
 }
 
@@ -14,7 +14,7 @@ void string_init_capacity(String *string, int cap) {
   string->size = 0;
   string->capacity = cap;
   string->data =
-      (int *)calloc((size_t)string->capacity+2, sizeof(*string->data));
+      (int *)calloc((size_t)string->capacity + 2, sizeof(*string->data));
   assert(string->data != NULL);
 }
 

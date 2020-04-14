@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 
 void print_list(struct node **list, int size) {
-  for(int i = 0; i < size; ++i) {
+  for (int i = 0; i < size; ++i) {
     printf("%ls", tag_string[list[i]->token]);
     for (int j = 0; j < list[i]->attr_size; ++j) {
       printf("\t%ls", list[i]->attr[j].name.data);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     }
 
     // NOTE(elias): fseek(file, 0, SEEK_SET); fseek(file, 0, SEEK_END);
-    struct stat f_stat = {0};// makes the fgetwc fail
+    struct stat f_stat = {0}; // makes the fgetwc fail
     // So I'm using fstat instead. That might be better anyway.
     fstat(fileno(file), &f_stat);
 
@@ -59,10 +59,10 @@ int main(int argc, char *argv[]) {
   parse(&root, raw_text.data);
   struct node **result;
   int size;
-  result = search(&root, L"div div", &size); //starts at body
+  result = search(&root, L"div div", &size); // starts at body
   print_list(result, size);
 
-/*  print_nodes(&root, 0);*/
+  /*  print_nodes(&root, 0);*/
   fclose(file);
   free(result);
   free(raw_text.data);

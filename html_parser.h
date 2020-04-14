@@ -181,7 +181,8 @@ struct node **search(struct node *root, wchar_t *str, int *size);
 int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
 /* Search for the nodes by css matching system. */
 enum html_tag get_token(wchar_t *start, wchar_t *end);
-struct node **get_nodes(struct node *root, struct node *srch, int srch_size, int *size);
+struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
+                        int *size);
 void parse(struct node *node, wchar_t *text);
 
 #endif // _HTML_PARSER_H

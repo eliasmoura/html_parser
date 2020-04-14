@@ -2,8 +2,8 @@
 #define STRING_H
 
 #include <assert.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <wchar.h>
 #define MAX_INT (int)((unsigned int)(~(int)0) >> 1)
 

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     }
 
     // NOTE(elias): fseek(file, 0, SEEK_SET); fseek(file, 0, SEEK_END);
-    struct stat f_stat = {0};// makes the fgetwc fail
+    struct stat f_stat = {0}; // makes the fgetwc fail
     // So I'm using fstat instead. That might be better anyway.
     fstat(fileno(file), &f_stat);
 

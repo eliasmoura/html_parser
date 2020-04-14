@@ -1,10 +1,10 @@
 #include "html_parser.h"
 #include "string.h"
 #include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 void node_init(struct node *root, enum html_tag tag) {
   root->token = tag;
@@ -20,7 +20,8 @@ void node_init(struct node *root, enum html_tag tag) {
 void add_node(struct node *root, enum html_tag new_node) {
   if (!root->childs) {
     int size = INIT_SIZE;
-    if(root->size >= INIT_SIZE) size = root->size*2;
+    if (root->size >= INIT_SIZE)
+      size = root->size * 2;
     root->childs = calloc(sizeof(struct node), (unsigned int)size);
     assert(root->childs);
   }
@@ -106,13 +107,12 @@ struct node **search(struct node *root, wchar_t *str, int *size) {
         ++str;
       end = str - 1;
       srch[index].token = get_token(start, end);
-        
     }
     // > , [input] ![text] !([password] || [email])
     ++index;
   }
 
-  result= get_nodes(root, srch, index, size);
+  result = get_nodes(root, srch, index, size);
   free(srch);
   if (result)
     return result;
@@ -122,13 +122,13 @@ struct node **search(struct node *root, wchar_t *str, int *size) {
 struct node *next_node(struct node *node) {
   struct node *prev = node;
   struct node *next = node;
-  while(next){
-    if(next->childs != NULL){
-      if(next == prev->parent) {
-        if(prev != next->childs+(next->size-1)){// not the last child
+  while (next) {
+    if (next->childs != NULL) {
+      if (next == prev->parent) {
+        if (prev != next->childs + (next->size - 1)) { // not the last child
           next = ++prev;
           break;
-        }  else { // if(next != next->childs+next->size-1)
+        } else { // if(next != next->childs+next->size-1)
           prev = next;
           next = next->parent;
         }
@@ -144,10 +144,10 @@ struct node *next_node(struct node *node) {
   return next;
 }
 
-bool is_in_node(struct node* root, struct node *child){
+bool is_in_node(struct node *root, struct node *child) {
   bool result = false;
-  while(child && child != root) {
-    if(root == child) {
+  while (child && child != root) {
+    if (root == child) {
       result = true;
       break;
     }
@@ -156,52 +156,54 @@ bool is_in_node(struct node* root, struct node *child){
   return result;
 }
 
-struct node ** get_nodes(struct node *root, struct node *srch,
-                        int srch_size, int *size) {
+struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
+                        int *size) {
   struct node *it;
   int l_index = 0;
   struct node **list;
-  list = calloc((size_t)l_index+10, sizeof(list[0]));
+  list = calloc((size_t)l_index + 10, sizeof(list[0]));
   it = root;
-  struct node * base = it;
+  struct node *base = it;
 
   while (it) {
     int s_index = 0;
     bool is_node = false;
-    for(; s_index < srch_size && it; ++s_index){
+    for (; s_index < srch_size && it; ++s_index) {
       is_node = false;
       if (srch[s_index].token != HTML_UNKNOWNTAG) {
-        while(it) {
+        while (it) {
           if (it->token == srch[s_index].token) {
-            if(is_in_node(base, it))
-            is_node = true;
+            if (is_in_node(base, it))
+              is_node = true;
             break;
           } else {
-              it = next_node(it);
+            it = next_node(it);
           }
         }
       }
 
-      if(it && srch[s_index].attr) {
-          for (int index = 0; index < srch[s_index].attr_size; index++) {
-            for (int attr_index = 0; attr_index < it->attr_size; attr_index++) {
-              if (srch[s_index].attr[index].id == it->attr[attr_index].id) {
-                if (string_compair(&srch[s_index].attr[index].value, &it->attr[attr_index].value) == 0){
-                  is_node = true;
-                } else {
-                  is_node = false;
-                  index = srch[s_index].attr_size;
-                  break;
-                }
+      if (it && srch[s_index].attr) {
+        for (int index = 0; index < srch[s_index].attr_size; index++) {
+          for (int attr_index = 0; attr_index < it->attr_size; attr_index++) {
+            if (srch[s_index].attr[index].id == it->attr[attr_index].id) {
+              if (string_compair(&srch[s_index].attr[index].value,
+                                 &it->attr[attr_index].value) == 0) {
+                is_node = true;
+              } else {
+                is_node = false;
+                index = srch[s_index].attr_size;
+                break;
               }
+            }
           }
         }
       } // if(it && srch[s_index].attr)
-      if (is_node) base = it;
-      if(s_index < srch_size-1)
+      if (is_node)
+        base = it;
+      if (s_index < srch_size - 1)
         it = next_node(it);
     } // for(; s_index < srch_size; ++s_index)
-    if(is_node && s_index == srch_size) {
+    if (is_node && s_index == srch_size) {
       list[l_index++] = it;
       it = next_node(it);
     }
@@ -252,7 +254,7 @@ void parse(struct node *node, wchar_t *text) {
         //   walk = walk->childs + walk->size - 1;
         // }
         walk = walk->childs + (walk->size - 1);
-      } else if (walk->parent){
+      } else if (walk->parent) {
         walk = walk->parent;
       }
       start_token = NULL;
