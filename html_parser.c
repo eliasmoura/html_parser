@@ -74,32 +74,13 @@ void free_nodes(struct node *root) {
     root = root->parent;
   }
   return;
-  /*if(root)
-   {
-    if(root->attr_size){
-      for(int i = 0; i < root->attr_size; ++i)
-      {
-        free_attr(&root->attr[i]);
-        --root->attr_size;
-      }
-      --root->attr_size;
-      free(root->attr);
-    }
-    int size = root->size;
-    for(int i = 0; i < size; ++i){
-      free_nodes(root->childs + i);
-      root->size -= 1;
-    }
-    if(root->parent && root->parent->childs[0].token == root->token)
-      free(root->parent->childs);
-  }*/
 }
 
-struct node *search(struct node *root, wchar_t *str) {
-  struct srch_node *srch = calloc(sizeof(struct srch_node), 10);
+struct node **search(struct node *root, wchar_t *str, int *size) {
+  struct node *srch = calloc(sizeof(srch), 10);
   int index = 0;
   wchar_t *start = str, *end = NULL;
-  struct node *result = 0;
+  struct node **result = 0;
   while (*str != '\0') {
     while ((*str == ' ' || *str == '\n' || *str == '\r' || *str == '\t') &&
            *str != '\0')
