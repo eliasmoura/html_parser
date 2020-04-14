@@ -2,6 +2,7 @@
 #define STRING_H
 
 #include <assert.h>
+#include <string.h>
 #include <stdlib.h>
 #include <wchar.h>
 #define MAX_INT (int)((unsigned int)(~(int)0) >> 1)
@@ -13,7 +14,7 @@ typedef struct _string {
 } String;
 
 void string_init(String *string);
-void string_init_size(String *string, int size);
+void string_init_capacity(String *string, int cap);
 void string_append(String *string, String *value);
 void string_copy(wchar_t *start, wchar_t *end, String *dest);
 String string_copy_from_char(wchar_t *c);

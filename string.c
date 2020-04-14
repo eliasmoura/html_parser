@@ -1,25 +1,23 @@
 #include "string.h"
-#include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #define MAX_INT (int)((unsigned int)(~(int)0) >> 1)
 
 void string_init(String *string) {
   string->size = 0;
   string->capacity = 100;
   string->data =
-      (int *)malloc((size_t)(size_t)(string->capacity) * sizeof(int));
+      (int *)calloc((size_t)string->capacity+1, sizeof(*string->data));
   assert(string->data != NULL);
 }
-void string_init_size(String *string, int size) {
-  string->size = size;
-  string->capacity = size;
-  string->data = (int *)malloc(sizeof(String) * (size_t)string->capacity *
-                               sizeof(string->size));
-  for (int i = 0; i <= string->capacity; i++)
-    string->data[i] = '\0';
+
+void string_init_capacity(String *string, int cap) {
+  string->size = 0;
+  string->capacity = cap;
+  string->data =
+      (int *)calloc((size_t)string->capacity+2, sizeof(*string->data));
   assert(string->data != NULL);
 }
+
 void string_append(String *string, String *value) {
   if ((string->size + value->size) > string->capacity)
     string_resize(string, string->size + (int)(value->size * 1.5));
@@ -27,6 +25,7 @@ void string_append(String *string, String *value) {
     string->data[string->size + i] = value->data[i];
   string->size += 1;
 }
+
 void string_copy(wchar_t *start, wchar_t *end, String *dest) {
   int size = (int)(end - start) + dest->size + 2;
   if (dest->capacity < size) {
@@ -44,6 +43,7 @@ void string_copy(wchar_t *start, wchar_t *end, String *dest) {
     dest->data[dest->size] = *start;
   dest->data[dest->size] = '\0';
 }
+
 String string_copy_from_char(wchar_t *c) {
   String str;
   int count = 0;
@@ -60,6 +60,7 @@ String string_copy_from_char(wchar_t *c) {
     str.data[i] = (c[i]);
   return str;
 }
+
 void string_append_char(String *string, wchar_t c) {
   if (string->size >= string->capacity)
     string_resize(string, (int)((string->size + 1) * 1.5));
@@ -132,7 +133,7 @@ int string_pop(String *string) {
 void remove_char(String *string, wchar_t c) {
   String tmp;
   tmp.size = string->size;
-  string_init_size(&tmp, string->size);
+  string_init_capacity(&tmp, string->size);
   int tmpIndex = 0;
   for (int i = 0; i < string->size; i++) {
     if (string->data[i] != c)
