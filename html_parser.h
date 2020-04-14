@@ -13,7 +13,7 @@ typedef uint32_t bool32;
 
 // TAG(enum, string, self_close, ver)
 // NOTE: ver is for checking if the tag is depracated(0)/HTML5 only(1)/both(2)
-// NOTE: self_close: 0 has a </> close tag, 1 does not
+// NOTE: self_close: 0 <tag> has a </tag> close tag, 1 does not
 #define HTML_TAG_LIST                                                          \
   TAG(HTML_UNKNOWNTAG, L"HTNL_UNKNOWNTAG", 1, 0)                               \
   TAG(HTML_DOCTYPE, L"!DOCTYPE", 1, 1)                                         \
@@ -177,11 +177,11 @@ void add_node(struct node *root, enum html_tag new_node);
 void add_attribute(struct node *root, struct attribute *attr);
 void free_attr(struct attribute *attr);
 void free_nodes(struct node *root);
-struct node *search(struct node *root, wchar_t *str);
+struct node **search(struct node *root, wchar_t *str, int *size);
 int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
 /* Search for the nodes by css matching system. */
 enum html_tag get_token(wchar_t *start, wchar_t *end);
-struct node *get_node(struct node *root, struct srch_node srch);
+struct node **get_nodes(struct node *root, struct node *srch, int srch_size, int *size);
 void parse(struct node *node, wchar_t *text);
 
 #endif // _HTML_PARSER_H

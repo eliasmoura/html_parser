@@ -3,15 +3,13 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 void node_init(struct node *root, enum html_tag tag) {
   root->token = tag;
   root->self_close = tag_self_close[root->token];
-  if (!root->self_close) {
-    root->childs = calloc(sizeof(struct node), (unsigned int)INIT_SIZE);
-    assert(root->childs);
-  } else
-    root->childs = NULL;
+  root->childs = NULL;
   root->cap = INIT_SIZE;
   root->size = 0;
   root->attr = NULL;
@@ -20,10 +18,14 @@ void node_init(struct node *root, enum html_tag tag) {
 }
 
 void add_node(struct node *root, enum html_tag new_node) {
-  struct node tmp;
-  node_init(&tmp, new_node);
-  tmp.parent = root;
-  root->childs[root->size] = tmp;
+  if (!root->childs) {
+    int size = INIT_SIZE;
+    if(root->size >= INIT_SIZE) size = root->size*2;
+    root->childs = calloc(sizeof(struct node), (unsigned int)size);
+    assert(root->childs);
+  }
+  node_init(&root->childs[root->size], new_node);
+  root->childs[root->size].parent = root;
   ++root->size;
 }
 
