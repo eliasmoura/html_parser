@@ -156,7 +156,7 @@ bool is_in_node(struct node *root, struct node *child) {
   return result;
 }
 
-struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
+struct node **get_nodes(struct node *root, struct search *srch, int srch_size,
                         int *size) {
   struct node *it;
   int l_index = 0;
@@ -170,9 +170,9 @@ struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
     bool is_node = false;
     for (; s_index < srch_size && it; ++s_index) {
       is_node = false;
-      if (srch[s_index].token != HTML_UNKNOWNTAG) {
+      if (srch[s_index].node.token != HTML_UNKNOWNTAG) {
         while (it) {
-          if (it->token == srch[s_index].token) {
+          if (it->token == srch[s_index].node.token) {
             if (is_in_node(base, it))
               is_node = true;
             break;
@@ -182,16 +182,16 @@ struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
         }
       }
 
-      if (it && srch[s_index].attr) {
-        for (int index = 0; index < srch[s_index].attr_size; index++) {
+      if (it && srch[s_index].node.attr) {
+        for (int index = 0; index < srch[s_index].node.attr_size; index++) {
           for (int attr_index = 0; attr_index < it->attr_size; attr_index++) {
-            if (srch[s_index].attr[index].id == it->attr[attr_index].id) {
-              if (string_compair(&srch[s_index].attr[index].value,
+            if (srch[s_index].node.attr[index].id == it->attr[attr_index].id) {
+              if (string_compair(&srch[s_index].node.attr[index].value,
                                  &it->attr[attr_index].value) == 0) {
                 is_node = true;
               } else {
                 is_node = false;
-                index = srch[s_index].attr_size;
+                index = srch[s_index].node.attr_size;
                 break;
               }
             }

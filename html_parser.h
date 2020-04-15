@@ -168,8 +168,10 @@ struct node {
   struct node *childs;
 };
 
-struct srch_node {
+struct search {
   enum srch_type type;
+  bool hard_depend;
+  struct node node;
   String str;
 };
 void node_init(struct node *root, enum html_tag tag);
@@ -181,8 +183,8 @@ struct node **search(struct node *root, wchar_t *str, int *size);
 int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
 /* Search for the nodes by css matching system. */
 enum html_tag get_token(wchar_t *start, wchar_t *end);
-struct node **get_nodes(struct node *root, struct node *srch, int srch_size,
+struct node **get_nodes(struct node *root, struct search *srch, int srch_size,
                         int *size);
 void parse(struct node *node, wchar_t *text);
-
+unsigned long attribute_get(wchar_t *start, struct attribute *attr);
 #endif // _HTML_PARSER_H
