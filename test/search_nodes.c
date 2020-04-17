@@ -51,21 +51,20 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Reading from stdin\n");
     string_init(&raw_text);
   }
+  fclose(file);
 
   struct node root = {0};
   node_init(&root, HTML_DOC);
   root.self_close = 1;
 
   parse(&root, raw_text.data);
-  struct node **result;
-  int size;
-  result = search(&root, L"div div", &size); // starts at body
-  print_list(result, size);
+  struct search srch;
+  search(&root, &srch, L"div div"); // starts at body
+  print_list(srch.result, (int)srch.size);
 
   /*  print_nodes(&root, 0);*/
-  fclose(file);
-  free(result);
-  free(raw_text.data);
-  free_nodes(&root);
+  free_string(&raw_text);
+  search_free(&srch);
+  node_free(&root);
   return 0;
 }

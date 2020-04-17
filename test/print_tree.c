@@ -66,6 +66,6 @@ int main(int argc, char *argv[]) {
   print_nodes(&root, 0);
   fclose(file);
   free(raw_text.data);
-  free_nodes(&root);
+  node_free(&root);
   return 0;
 }

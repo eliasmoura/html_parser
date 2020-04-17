@@ -17,7 +17,7 @@ void node_init(struct node *root, enum html_tag tag) {
   root->attr_cap = 0;
 }
 
-void add_node(struct node *root, enum html_tag new_node) {
+void node_add(struct node *root, enum html_tag new_node) {
   if (!root->childs) {
     int size = INIT_SIZE;
     if (root->size >= INIT_SIZE)
@@ -30,7 +30,7 @@ void add_node(struct node *root, enum html_tag new_node) {
   ++root->size;
 }
 
-void add_attribute(struct node *root, struct attribute *attr) {
+void attribute_add(struct node *root, struct attribute *attr) {
   if (!root->attr_cap) {
     root->attr = calloc(sizeof(struct attribute), (unsigned int)root->cap);
     root->attr_size = 0;
@@ -51,14 +51,14 @@ void add_attribute(struct node *root, struct attribute *attr) {
   root->attr_size += 1;
 }
 
-void free_attr(struct attribute *attr) {
+void attribute_free(struct attribute *attr) {
   if (attr) {
     free_string(&attr->name);
     free_string(&attr->value);
   }
 }
 
-void free_nodes(struct node *root) {
+void node_free(struct node *root) {
   while (root) {
     if (root->size) {
       root = root->childs + (--(root->size));
@@ -68,7 +68,7 @@ void free_nodes(struct node *root) {
 
     for (int i = 0; i < root->attr_size; ++i) {
       assert(root->attr && &(root->attr[i]));
-      free_attr(&(root->attr[i]));
+      attribute_free(&(root->attr[i]));
     }
     free(root->attr);
     root->attr_size = 0;
@@ -81,45 +81,36 @@ struct node **search(struct node *root, wchar_t *str, int *size) {
   struct node *srch = calloc(sizeof(srch), 10);
   int index = 0;
   wchar_t *start = str, *end = NULL;
-  struct node **result = 0;
   while (*str != '\0') {
-    while ((*str == ' ' || *str == '\n' || *str == '\r' || *str == '\t') &&
-           *str != '\0')
+    while (is_white_space(str) && *str != '\0')
       ++str;
     if (*str == '.') {
       start = ++str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
-             *str != '\0')
+      while (!is_white_space(str) && *str != '\0')
         ++str;
       end = str - 1;
       srch[index].token = get_token(start, end);
     } else if (*str == '#') {
       start = ++str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
-             *str != '\0')
+      while (!is_white_space(str) && *str != '\0')
         ++str;
       end = str - 1;
       srch[index].token = get_token(start, end);
     } else {
       start = str;
-      while (*str != ' ' && *str != '\n' && *str != '\r' && *str != '\t' &&
-             *str != '\0')
+      while (!is_white_space(str) && *str != '.' && *str != '#' && *str != '[' && *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].token = get_token(start, end);
+      srch->search_element.elemets[srch->search_element.size].node.token = token_get(start, end);
     }
     // > , [input] ![text] !([password] || [email])
     ++index;
   }
 
-  result = get_nodes(root, srch, index, size);
-  free(srch);
-  if (result)
-    return result;
-  return 0;
+  node_get(root, srch);
 }
 
-struct node *next_node(struct node *node) {
+struct node *node_next(struct node *node) {
   struct node *prev = node;
   struct node *next = node;
   while (next) {
@@ -156,63 +147,66 @@ bool is_in_node(struct node *root, struct node *child) {
   return result;
 }
 
-struct node **get_nodes(struct node *root, struct search *srch, int srch_size,
-                        int *size) {
-  struct node *it;
-  int l_index = 0;
-  struct node **list;
-  list = calloc((size_t)l_index + 10, sizeof(list[0]));
-  it = root;
-  struct node *base = it;
+void node_get(struct node *root, struct search *srch) {
+  srch->size = 0;
+  srch->cap = 10;
+  srch->result = calloc((size_t)srch->size + srch->cap, sizeof(srch->result[0]));
+  struct node *it = root;
 
   while (it) {
-    int s_index = 0;
+    unsigned int s_index = 0;
     bool is_node = false;
-    for (; s_index < srch_size && it; ++s_index) {
+    struct node *base = root;
+    for (; s_index < srch->search_element.size && it; ++s_index) {
       is_node = false;
-      if (srch[s_index].node.token != HTML_UNKNOWNTAG) {
+      if (srch->search_element.elemets[s_index].node.token != HTML_UNKNOWNTAG) {
         while (it) {
-          if (it->token == srch[s_index].node.token) {
+          if (it->token == srch->search_element.elemets[s_index].node.token) {
             if (is_in_node(base, it))
               is_node = true;
             break;
           } else {
-            it = next_node(it);
+            it = node_next(it);
           }
         }
       }
 
-      if (it && srch[s_index].node.attr) {
-        for (int index = 0; index < srch[s_index].node.attr_size; index++) {
-          for (int attr_index = 0; attr_index < it->attr_size; attr_index++) {
-            if (srch[s_index].node.attr[index].id == it->attr[attr_index].id) {
-              if (string_compair(&srch[s_index].node.attr[index].value,
+      if (it && srch->search_element.elemets[s_index].node.attr) {
+        for (int index = 0; index < srch->search_element.elemets[s_index].node.attr_size; ++index) {
+          for (int attr_index = 0; attr_index < it->attr_size; ++attr_index) {
+            if (string_compair(&srch->search_element.elemets[s_index].node.attr[index].name, &it->attr[attr_index].name)) {
+              if (string_compair(&srch->search_element.elemets[s_index].node.attr[index].value,
                                  &it->attr[attr_index].value) == 0) {
                 is_node = true;
               } else {
                 is_node = false;
-                index = srch[s_index].node.attr_size;
+                index = srch->search_element.elemets[s_index].node.attr_size;
                 break;
               }
             }
           }
         }
-      } // if(it && srch[s_index].attr)
+      } // if(it && srch->search_element.elemets[s_index].attr)
       if (is_node)
         base = it;
-      if (s_index < srch_size - 1)
-        it = next_node(it);
+      if (s_index < srch->search_element.size - 1)
+        it = node_next(it);
     } // for(; s_index < srch_size; ++s_index)
-    if (is_node && s_index == srch_size) {
-      list[l_index++] = it;
-      it = next_node(it);
+    if (is_node && s_index == srch->search_element.size) {
+      srch->result[srch->size++] = it;
+      it = node_next(it);
+      if(srch->size >= srch->cap){
+        srch->cap = srch->cap*2;
+        struct node **tmp = srch->result;
+        srch->result = calloc((size_t)srch->size + srch->cap, sizeof(srch->result[0]));
+        memcpy(srch->result, tmp, srch->size*sizeof(srch->result[0]));
+        free(tmp);
+      }
     }
   }
-  *size = l_index;
-  return list;
 }
 
-enum html_tag get_token(wchar_t *start, wchar_t *end) {
+enum html_tag token_get(wchar_t *start, wchar_t *end) {
   for (int i = 0; i < MAX_HTML_TAGS; i++) {
     if (string_compair_chars(start, end, (wchar_t *)tag_string[i]) == 0) {
       return (enum html_tag)i;
@@ -227,6 +221,7 @@ void parse(struct node *node, wchar_t *text) {
   bool32 in_tag = false;
   bool32 is_closing_tag = false;
   struct node *walk = node;
+  while(is_white_space(interator)) ++interator;
   while (*interator != '\0') {
     if (*interator == '<') {
       ++interator;
@@ -246,7 +241,7 @@ void parse(struct node *node, wchar_t *text) {
       end_token = interator - 1;
 
       if (!is_closing_tag) {
-        add_node(walk, get_token(start_token, end_token));
+        node_add(walk, token_get(start_token, end_token));
         // XXX: I would like to use something like this, this makes things
         // harder, howerver.
         // if(!walk->childs[walk->size-1].self_close)
@@ -283,7 +278,7 @@ void parse(struct node *node, wchar_t *text) {
                      ? (long unsigned)attr.name.size
                      : sizeof(tag_string[HTML_TEXT]));
           string_copy(start_token, end_token, &attr.value);
-          add_attribute(walk, &attr);
+          attribute_add(walk, &attr);
           interator = interator + 2;
           continue;
         }
@@ -297,7 +292,7 @@ void parse(struct node *node, wchar_t *text) {
         string_copy(start_token, end_token, &attr.name);
 
         if (*interator != '=') {
-          add_attribute(walk, &attr);
+          attribute_add(walk, &attr);
           continue;
         }
         ++interator;
@@ -310,7 +305,7 @@ void parse(struct node *node, wchar_t *text) {
         end_token = interator - 1;
         string_copy(start_token, end_token, &attr.value);
 
-        add_attribute(walk, &attr);
+        attribute_add(walk, &attr);
         if (*interator != '>')
           ++interator;
       }
@@ -321,16 +316,14 @@ void parse(struct node *node, wchar_t *text) {
       in_tag = false;
     } else {
       while (walk->token != HTML_PRE &&
-             (*interator == ' ' || *interator == '\n' || *interator == '\r' ||
-              *interator == '\t'))
+             (is_white_space(interator)))
         ++interator;
       if (*interator == '<' || (is_closing_tag && (walk->token == HTML_DOC ||
                                                    walk->token == HTML_HTML)))
         continue;
       if (walk->token == HTML_SCRIPT) {
         // XXX I need to do more checks under SRIPT tags.
-        while (*interator == ' ' || *interator == '\n' || *interator == '\r' ||
-               *interator == '\t')
+        while (is_white_space(interator))
           ++interator;
         if (*interator == '<' || (is_closing_tag && (walk->token == HTML_DOC ||
                                                      walk->token == HTML_HTML)))
@@ -355,8 +348,8 @@ void parse(struct node *node, wchar_t *text) {
         wchar_t str[] = L"text";
         string_copy(str, &str[(sizeof(str) / sizeof(wchar_t)) - 1], &attr.name);
         string_copy(start_token, end_token, &attr.value);
-        add_node(walk, HTML_TEXT);
-        add_attribute(&walk->childs[walk->size - 1], &attr);
+        node_add(walk, HTML_TEXT);
+        attribute_add(&walk->childs[walk->size - 1], &attr);
 
         continue;
       }
@@ -370,8 +363,8 @@ void parse(struct node *node, wchar_t *text) {
       wchar_t str[] = L"text";
       string_copy(str, &str[(sizeof(str) / sizeof(wchar_t)) - 1], &attr.name);
       string_copy(start_token, end_token, &attr.value);
-      add_node(walk, HTML_TEXT);
-      add_attribute(walk->childs + walk->size - 1, &attr);
+      node_add(walk, HTML_TEXT);
+      attribute_add(walk->childs + walk->size - 1, &attr);
 
       continue;
     }

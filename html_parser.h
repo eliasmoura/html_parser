@@ -168,23 +168,37 @@ struct node {
   struct node *childs;
 };
 
+struct search_element {
+    unsigned int size;
+    unsigned int cap;
+    struct {
+      struct node node;
+      bool hard_depend;
+    } *elemets;
+};
+
 struct search {
-  enum srch_type type;
-  bool hard_depend;
-  struct node node;
+  struct search_element search_element;
+  unsigned int size;
+  unsigned int cap;
+  struct node **result;
   String str;
 };
-void node_init(struct node *root, enum html_tag tag);
-void add_node(struct node *root, enum html_tag new_node);
-void add_attribute(struct node *root, struct attribute *attr);
-void free_attr(struct attribute *attr);
-void free_nodes(struct node *root);
-struct node **search(struct node *root, wchar_t *str, int *size);
-int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
-/* Search for the nodes by css matching system. */
-enum html_tag get_token(wchar_t *start, wchar_t *end);
-struct node **get_nodes(struct node *root, struct search *srch, int srch_size,
-                        int *size);
+
+enum html_tag token_get(wchar_t *start, wchar_t *end);
 void parse(struct node *node, wchar_t *text);
+
+void node_init(struct node *root, enum html_tag tag);
+void node_add(struct node *root, enum html_tag new_node);
+void node_free(struct node *root);
+
 unsigned long attribute_get(wchar_t *start, struct attribute *attr);
+void attribute_add(struct node *root, struct attribute *attr);
+void attribute_free(struct attribute *attr);
+
+/* Search for the nodes by css matching system. */
+void search_free(struct search *search);
+void search(struct node *root, struct search *srch, wchar_t *str);
+void node_get(struct node *root, struct search *srch);
+int get_element_by_id(struct node *src, struct node *dest, wchar_t *str);
 #endif // _HTML_PARSER_H
