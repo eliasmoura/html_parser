@@ -44,6 +44,33 @@ void string_copy(wchar_t *start, wchar_t *end, String *dest) {
   dest->data[dest->size] = '\0';
 }
 
+void string_trim(String *src, int side, wchar_t *ch){
+  if(src->size){
+    if(side == 2 || side == 0)
+      for(int i = src->size-1; i >= 0; --i){
+        if(src->data[i] == ' ' || src->data[i] == '\n' || src->data[i] == *ch) {
+          src->data[i] = '\0';
+          --src->size;
+        } else break;
+      }
+    if(side == 1 || side == 0)
+      for(int i = 0; i < src->size; ++i){
+        if(src->data[i] == ' ') {
+          src->data[i] = '\0';
+          --src->size;
+        } else break;
+      }
+  }
+}
+
+bool is_white_space(wchar_t *str) {
+  bool result = false;
+  // NOTE(elias): 65279 is a zero-width no-break space
+  if(*str == ' ' || *str == '\n' || *str == '\r' || *str == '\t' || *str == 65279)
+    result = true;
+  return result;
+}
+
 String string_copy_from_char(wchar_t *c) {
   String str;
   int count = 0;

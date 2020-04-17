@@ -148,7 +148,7 @@ wchar_t *tag_string[] = {HTML_TAG_LIST};
 uint8_t tag_self_close[] = {HTML_TAG_LIST};
 #undef TAG
 
-enum srch_type { HTML_TAG, TAG_CLASS, TAG_ID, INPUT_TYPE };
+enum srch_type { TAG_ATTR, HTML_TAG, TAG_CLASS, TAG_ID, INPUT_TYPE };
 
 struct attribute {
   int id;

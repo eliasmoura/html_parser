@@ -8,21 +8,49 @@
 #include <locale.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include "string.h"
 
-void print_nodes(struct node *parent, int level) {
+void print_nodes(struct node *node, int level) {
   char *identing = "  ";
-  printf("%ls", tag_string[parent->token]);
-  for (int i = 0; i < parent->attr_size; ++i) {
-    printf("\t%ls", parent->attr[i].name.data);
-    if (parent->attr[i].value.data)
-      printf(" → %ls", parent->attr[i].value.data);
-  }
-  printf("\n");
-  ++level;
-  for (int i = 0; i < parent->size; ++i) {
+
+  if( node->token != HTML_DOC) {
     for (int j = 0; j < level; ++j)
       printf("%s", identing);
-    print_nodes(&parent->childs[i], level);
+
+    if(node->token != HTML_TEXT) {
+      printf("<%ls", tag_string[node->token]);
+      if(node->token != HTML_COMMENT) {
+        for (int i = 0; i < node->attr_size; ++i) {
+          printf(" %ls", node->attr[i].name.data);
+          if (node->attr[i].value.data)
+            printf("=\"%ls\"", node->attr[i].value.data);
+        }
+        printf(">\n");
+      } else {
+        printf("%ls", node->attr[0].value.data);
+        printf("-->\n");
+      }
+    } else if(node->attr->value.size) {
+      wchar_t ch = ' ';
+      string_trim(&node->attr[0].value, 2, &ch);
+      printf("%ls\n", node->attr[0].value.data);
+    }
+
+    for (int i = 0; i < node->size; ++i) {
+      int child_level = level;
+      if(!node->self_close)
+        ++child_level;
+      print_nodes(&node->childs[i], child_level);
+    }
+
+    if(node->token != HTML_TEXT && !node->self_close){
+      for (int j = 0; j < level; ++j)
+        printf("%s", identing);
+      printf("</%ls>\n", tag_string[node->token]);
+    }
+  } else {
+    for(int i = 0; i < node->size; ++i)
+      print_nodes(node->childs+i, level);
   }
 }
 
@@ -33,11 +61,11 @@ int main(int argc, char *argv[]) {
 
   if (argc == 2) {
     char *path = argv[1];
-    printf("Reading file: %s\n", path);
+    fprintf(stderr, "Reading file: %s\n", path);
     file = fopen(path, "r");
 
     if (file == NULL) {
-      printf("Couldn't load the file \"%s\"!! Exiting...\n", path);
+      fprintf(stderr, "Couldn't load the file \"%s\"!! Exiting...\n", path);
       return 1;
     }
 

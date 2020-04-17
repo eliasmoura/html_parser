@@ -77,35 +77,98 @@ void node_free(struct node *root) {
   return;
 }
 
-struct node **search(struct node *root, wchar_t *str, int *size) {
-  struct node *srch = calloc(sizeof(srch), 10);
-  int index = 0;
+unsigned long attribute_get(wchar_t *start, struct attribute *attr) {
+  unsigned long size = 0;
+  wchar_t *it = start;
+  wchar_t *end_token, *start_token = start;
+  while (*it != '>') {
+    while (it &&
+           ((*it >= 'a' && *it <= 'z') ||
+            (*it >= 'A' && *it <= 'Z') || *it == '-'))
+      ++it;
+    end_token = it - 1;
+
+    string_copy(start_token, end_token, &attr->name);
+
+    if (*it != '=') {
+      continue;
+    }
+    ++it;
+    if (*it == '"')
+      ++it;
+
+    start_token = it;
+    while (*it != '"' && *it != '>' && *it != '<')
+      ++it;
+    end_token = it - 1;
+    string_copy(start_token, end_token, &attr->value);
+
+    if (*it != '>')
+      ++it;
+  }
+  size = (unsigned long)it-(unsigned long)start;
+  return size;
+}
+
+void search_free(struct search *search) {
+  free_string(&search->str);
+  free(search->search_element.elemets);
+  free(search->result);
+}
+
+void search(struct node *root, struct search *srch, wchar_t *str) {
+  srch->search_element.size = 0;
+  srch->search_element.cap = 10;
+  srch->search_element.elemets = calloc(sizeof(*srch->search_element.elemets), srch->cap);
   wchar_t *start = str, *end = NULL;
   while (*str != '\0') {
     while (is_white_space(str) && *str != '\0')
       ++str;
-    if (*str == '.') {
+    if (*str == '.') { // class attribute
       start = ++str;
       while (!is_white_space(str) && *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].token = get_token(start, end);
-    } else if (*str == '#') {
+      struct attribute attr = {0};
+      unsigned long size = attribute_get(str, &attr);
+      str = str+size;
+      attribute_add(&srch->search_element.elemets[srch->search_element.size].node, &attr);
+    }
+    if (*str == '#') { // id attribute
       start = ++str;
       while (!is_white_space(str) && *str != '\0')
         ++str;
       end = str - 1;
-      srch[index].token = get_token(start, end);
-    } else {
+      struct attribute attr = {0};
+      unsigned long size = attribute_get(str, &attr);
+      str = str+size;
+      attribute_add(&srch->search_element.elemets[srch->search_element.size].node, &attr);
+    }
+    if(*str == '[') { // tag attribute in general
+      // ![text] !([password] || [email])
+      start = ++str;
+      while (!is_white_space(str) && *str != ']' && *str != '\0')
+        ++str;
+      end = str - 1;
+      struct attribute attr = {0};
+      unsigned long size = attribute_get(str, &attr);
+      str = str+size;
+      attribute_add(&srch->search_element.elemets[srch->search_element.size].node, &attr);
+    }
+    if(*str == '>') { // this token depends to be a direct child of priveous token
+      srch->search_element.elemets[srch->search_element.size-1].hard_depend = true;
+      continue;
+    } else { // is a tag
       start = str;
       while (!is_white_space(str) && *str != '.' && *str != '#' && *str != '[' && *str != '\0')
         ++str;
       end = str - 1;
       srch->search_element.elemets[srch->search_element.size].node.token = token_get(start, end);
     }
-    // > , [input] ![text] !([password] || [email])
-    ++index;
+    if(is_white_space(str))
+      ++srch->search_element.size;
   }
+  if(!is_white_space(str)) ++srch->search_element.size;
 
   node_get(root, srch);
 }
@@ -137,13 +200,14 @@ struct node *node_next(struct node *node) {
 
 bool is_in_node(struct node *root, struct node *child) {
   bool result = false;
-  while (child && child != root) {
-    if (root == child) {
-      result = true;
-      break;
+  if (child != root)
+    while (child) {
+      if (root == child) {
+        result = true;
+        break;
+      }
+      child = child->parent;
     }
-    child = child->parent;
-  }
   return result;
 }
 

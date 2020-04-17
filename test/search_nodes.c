@@ -10,12 +10,22 @@
 #include <sys/stat.h>
 
 void print_list(struct node **list, int size) {
+  printf("Size: %d\n" ,size);
   for (int i = 0; i < size; ++i) {
-    printf("%ls", tag_string[list[i]->token]);
-    for (int j = 0; j < list[i]->attr_size; ++j) {
-      printf("\t%ls", list[i]->attr[j].name.data);
-      if (list[i]->attr[j].value.data)
-        printf(" → %ls", list[i]->attr[j].value.data);
+    struct node node = *list[i];
+    printf("%ls", tag_string[node.token]);
+    for (int j = 0; j < node.attr_size; ++j) {
+      printf("\t%ls", node.attr[j].name.data);
+      if (node.attr[j].value.data)
+        printf(" → %ls", node.attr[j].value.data);
+    }
+    printf("\n");
+    struct node parent = *node.parent;
+    printf("PARENT: «%ls", tag_string[parent.token]);
+    for (int j = 0; j < parent.attr_size; ++j) {
+      printf("\t%ls", parent.attr[j].name.data);
+      if (parent.attr[j].value.data)
+        printf(" → %ls", parent.attr[j].value.data);
     }
     printf("\n");
   }

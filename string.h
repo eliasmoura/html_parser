@@ -3,6 +3,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <wchar.h>
 #define MAX_INT (int)((unsigned int)(~(int)0) >> 1)
@@ -28,4 +29,6 @@ int string_pop(String *string);
 void remove_char(String *string, wchar_t c);
 void string_resize(String *string, int size);
 void free_string(String *string);
+bool is_white_space(wchar_t *ch);
+void string_trim(String *src, int side, wchar_t *ch);
 #endif
